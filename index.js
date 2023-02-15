@@ -68,7 +68,8 @@ app.get('/pokemon', async (req, res, next) => {
   app.post('/createEntry', requiresAuth(), async (req, res, next) => {
     try {
       const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description})
-      await newPokemon.setUser(req.user.id)
+     await newPokemon.setUser(req.user.id)
+      console.log(newPokemon);
       res.send(newPokemon)
     } catch (error) {
       console.log(error);
@@ -78,12 +79,37 @@ app.get('/pokemon', async (req, res, next) => {
   app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
     try {
       const newPokemon = await Pokemon.findByPk(req.params.id)
+      console.log(newPokemon);
       await newPokemon.destroy()
       res.send("successfully deleted")
     } catch (error) {
       console.log(error);
       next(error)
     }
+  });
+
+  app.put('/pokemon/:id', async (req, res) => {
+    const id = req.params.id;
+    const updateData = req.body;
+  
+    try {
+      const pokemon = await Pokemon.findByPk(id)
+  
+      if(!pokemon){
+        res.status(404).json({message: 'Entry not found'});
+        return
+      }
+  
+      await pokemon.update(updateData)
+  
+      console.log(pokemon)
+      res.send(pokemon)
+    
+    } catch(error){
+      console.log(error)
+      res.status(500).json({message: 'Error Updated Entry'})
+    }
+  
   });
 
 // error handling middleware
