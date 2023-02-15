@@ -8,16 +8,6 @@ const {auth, requiresAuth} = require('express-openid-connect');
 
 const { User, Pokemon } = require('./db');
 
-const{SECRET, BASE_URL, CLIENT_ID, ISSUER_BASE_URL} = process.env
-
-const request = require('request')
-
-
-
-
-
-const { User, Pokemon } = require('./db');
-
 
 const{SECRET, BASE_URL, CLIENT_ID, ISSUER_BASE_URL, DOMAIN} = process.env
 
@@ -62,7 +52,7 @@ request(options, function(error, response, body){
 
   console.log(body)
 })
-
+  })
 
 
 app.use(auth(config));
