@@ -4,8 +4,9 @@ const express = require('express');
 const app = express();
 const { PORT = 3000 } = process.env;
 const {auth, requiresAuth} = require('express-openid-connect');
-const auth0 = require('auth0-js')
 const request = require('request')
+
+
 
 
 
@@ -41,7 +42,32 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
 
+//Put
 
+app.put('/pokemon/:id', async (req, res, next) => {
+  const id = req.params.id;
+  const updateData = req.body;
+
+  try {
+    const pokemon = await Pokemon.findByPk(id)
+
+    if(!pokemon){
+      res.status(404).json({message: 'Entry not found'});
+      return
+    }
+
+    await pokemon.update(updateData)
+
+    console.log(pokemon)
+    res.send(pokemon)
+
+  
+  } catch(error){
+    console.log(error)
+    res.status(500).json({message: 'Error Updated Entry'})
+  }
+
+});
 
 //pages creation
 app.get('/', (req, res) => {
@@ -84,7 +110,20 @@ app.get('/pokemon', async (req, res, next) => {
       next(error);
     }
   });
-   
+
+app.get('/pokemon/:id', async(req, res, next) => {
+  try{
+    res.send(await Pokemon.findByPk(req.params.id))
+  } catch(error){
+    console.error(error)
+    next(error)
+  }
+})
+
+
+  
+
+
 // error handling middleware
 app.use((error, req, res, next) => {
     console.error('SERVER ERROR: ', error);
