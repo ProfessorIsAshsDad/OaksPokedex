@@ -24,13 +24,14 @@ app.use(express.urlencoded({extended:true}));
 app.use(async (req, res, next) => {
   if (req.oidc.user) {
     const { nickname, name, email } = req.oidc.user;
-    await User.findOrCreate({
+    const [user, _isCreated] = await User.findOrCreate({
       where: {
         username: nickname,
         name: name,
         email: email,
       },
     });
+    req.user = user;
   }
   next();
 });
@@ -46,8 +47,8 @@ app.use(async (req, res, next) => {
 
 app.get('/profile', requiresAuth(), (req, res, next) => {
     try {
-      console.log(req.oidc.user)
-      res.send(req.oidc.user);
+      console.log(req.user)
+      res.send(req.user);
   
     } catch (error) {
       console.log(error);
@@ -64,7 +65,27 @@ app.get('/pokemon', async (req, res, next) => {
       next(error);
     }
   });
-   
+  app.post('/createEntry', requiresAuth(), async (req, res, next) => {
+    try {
+      const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description})
+      await newPokemon.setUser(req.user.id)
+      res.send(newPokemon)
+    } catch (error) {
+      console.log(error);
+      next(error)
+    }
+  });
+  app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
+    try {
+      const newPokemon = await Pokemon.findByPk(req.params.id)
+      await newPokemon.destroy()
+      res.send("successfully deleted")
+    } catch (error) {
+      console.log(error);
+      next(error)
+    }
+  });
+
 // error handling middleware
 app.use((error, req, res, next) => {
     console.error('SERVER ERROR: ', error);
