@@ -90,15 +90,7 @@ app.get('/profile', requiresAuth(), (req, res, next) => {
     }
   });
 
-  app.get('/admin', requiresAuth(), (req,res) =>{
-    const { user } = req.oidc;
-    console.log(JSON.stringify(user, null, 2))
-    if (user && user[`dev-tmc3snub41cprsj2.us.auth0.com/roles`] && user[`https://admincheck/api/`].includes('Admin')){
-      res.send('Protected Route')
-    } else {
-      res.status(403).send('Not authorised')
-    }
-  })
+
 
   
 app.get('/pokemon', async (req, res, next) => {
