@@ -1,11 +1,10 @@
 require('dotenv').config('.env');
+const cors = require("cors")
 const express = require('express');
 const app = express();
 const { PORT = 3000 } = process.env;
 const {auth, requiresAuth} = require('express-openid-connect');
-
 const { User, Pokemon } = require('./db');
-
 
 const{SECRET, BASE_URL, CLIENT_ID, ISSUER_BASE_URL} = process.env
 
@@ -18,31 +17,23 @@ const config = {
     issuerBaseURL: ISSUER_BASE_URL,
   };
 
-
+app.use(cors()) 
 app.use(auth(config));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-
-
-
-// const getUser = async (req,res,next)=>{
-//   try {
-//     if (req.oidc.user){
-//       const [user, _isCreated] = await User.findOrCreate({
-//         where:{
-//           username: req.oidc.user.name,
-//           name: req.oidc.user.nickname,
-//           email: req.oidc.user.email
-//         }
-//       })
-//       req.user = user;
-//     }
-//     next()
-//   } catch (error) {
-//     console.log(error)
-//     next(error)
-//   }
-// }
+app.use(async (req, res, next) => {
+  if (req.oidc.user) {
+    const { nickname, name, email } = req.oidc.user;
+    await User.findOrCreate({
+      where: {
+        username: nickname,
+        name: name,
+        email: email,
+      },
+    });
+  }
+  next();
+});
 
   app.get('/', (req, res) => {
     try{ 
