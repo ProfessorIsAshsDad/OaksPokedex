@@ -87,6 +87,13 @@ app.put('/pokemon/:id', async (req, res, next) => {
 
 });
 
+app.put('/:userId/pokemon/:pokemonId', async (req, res) => {
+  const user = await User.findByPk(req.params.userId)
+  const pokemon = await Pokemon.findByPk(req.params.pokemonId)
+  await user.addPokemon(pokemon)
+  res.send("pokemon has been added to user")
+} )
+
 //pages creation
 app.get('/', (req, res) => {
 
@@ -98,19 +105,24 @@ app.get('/', (req, res) => {
     }
 });
 
-app.get('/profile', requiresAuth(), (req, res, next) => {
-    try {
-      console.log(req.user)
-      res.send(req.user);
-  
-    } catch (error) {
-      console.log(error);
-      next(error)
-    }
-  });
+app.get('/login',requiresAuth(), (req, res, next) => {
+  try {
+    console.log(req.oidc.user)
+    res.send(req.oidc.user);
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+});
 
+app.get('/:userId', async (req, res) => {
+  res.send(await User.findByPk(req.params.userId))
+})
 
-
+app.get('/:userId/pokemon', async (req, res) => {
+  const user = await User.findByPk(req.params.userId)
+  res.send(await user.getPokemons())
+})
   
 app.get('/pokemon', async (req, res, next) => {
     try {
@@ -179,8 +191,31 @@ app.get('/pokemon/:id', async(req, res, next) => {
 })
 
 
-  
+app.post('/createEntry', requiresAuth(), async (req, res, next) => {
+  try {
+    const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description})
+   await newPokemon.setUser(req.user.id)
+    console.log(newPokemon);
+    res.send(newPokemon)
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+});
 
+app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
+  if(req.user.isAdmin === 1){
+  try {
+    const newPokemon = await Pokemon.findByPk(req.params.id)
+    console.log(newPokemon);
+    await newPokemon.destroy()
+    res.send("successfully deleted")
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+}
+});
 
 
 // error handling middleware

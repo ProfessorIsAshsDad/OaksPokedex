@@ -3,8 +3,8 @@ const {Pokemon} = require('./Pokemon');
 const {sequelize, Sequelize} = require('./db');
 
 
-Pokemon.belongsTo(User, {foreignKey: 'ownerID'});
-User.hasMany(Pokemon);
+Pokemon.belongsToMany(User, {through:'User_Pokemon'});
+User.belongsToMany(Pokemon,{through:'User_Pokemon'});
 
 module.exports = {
     Pokemon,
