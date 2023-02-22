@@ -59,21 +59,10 @@ const users = [
       username: "oak",
       name: "Professor Oak",
       password: "oakwood",
-      email: "profOak@example.com"
+      email: "profOak@example.com",
+      isAdmin: true
     },
-    {
-      username: "elm",
-      name: "Professor Elm",
-      password: "elmtree",
-      email: "profElm@example.com"
-    },
-    {
-      username: "birch",
-      name: "Professor Birch",
-      password: "birchleaves",
-      email: "profBirch@example.com"
-    }
-]
+  ]
   
 module.exports = {
     pokemon,
