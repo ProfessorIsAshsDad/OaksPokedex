@@ -204,7 +204,7 @@ app.post('/createEntry', requiresAuth(), async (req, res, next) => {
 });
 
 app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
-  if(req.user.isAdmin === 1){
+  
   try {
     const newPokemon = await Pokemon.findByPk(req.params.id)
     console.log(newPokemon);
@@ -214,7 +214,6 @@ app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
     console.log(error);
     next(error)
   }
-}
 });
 
 
