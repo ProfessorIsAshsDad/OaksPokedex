@@ -32,11 +32,11 @@ const seed = async () => {
       }
 
       if (i <= 151){
-        await pokemon.setUser(createdUsers[0].id)
+        await pokemon.addUser(createdUsers[0].id)
       }else if (i <=251){
-        await pokemon.setUser(createdUsers[1].id)
+        await pokemon.addUser(createdUsers[1].id)
       }else{
-        await pokemon.setUser(createdUsers[2].id)
+        await pokemon.addUser(createdUsers[2].id)
       }
     }
 
