@@ -119,6 +119,10 @@ app.get('/:userId/pokemon', async (req, res) => {
   res.send(await user.getPokemons())
 })
 
+app.get('/:userId/pokemon/:pokemonId', async (req, res) => {
+  const user = await User.findByPk(req.params.userId)
+  const pokemon = await Pokemon.findByPk(req.params.pokemonId)
+})
   
 app.get('/pokemon', async (req, res, next) => {
     try {
