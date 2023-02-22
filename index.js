@@ -40,6 +40,21 @@ app.use(auth(config));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
+app.use(async (req, res, next) => {
+  if (req.oidc.user) {
+    const { nickname, name, email } = req.oidc.user;
+    const [user, _isCreated] = await User.findOrCreate({
+      where: {
+        username: nickname,
+        name: name,
+        email: email,
+      },
+    });
+    req.user = user;
+  }
+  next();
+});
+
 
 //Put
 
