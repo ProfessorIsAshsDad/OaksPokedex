@@ -83,7 +83,7 @@ app.put('/pokemon/:id', async (req, res, next) => {
 
 });
 
-app.put('/app/:userId/pokemon/:pokemonId', async (req, res) => {
+app.put('/:userId/pokemon/:pokemonId', async (req, res) => {
   const user = await User.findByPk(req.params.userId)
   const pokemon = await Pokemon.findByPk(req.params.pokemonId)
   await user.addPokemon(pokemon)
@@ -91,7 +91,7 @@ app.put('/app/:userId/pokemon/:pokemonId', async (req, res) => {
 } )
 
 //pages creation
-app.get('/app', (req, res) => {
+app.get('/', (req, res) => {
     try{ 
         res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
     } catch (error){
@@ -100,7 +100,7 @@ app.get('/app', (req, res) => {
     }
 });
 
-app.get('/app/login',requiresAuth(), (req, res, next) => {
+app.get('/login',requiresAuth(), (req, res, next) => {
   try {
     console.log(req.oidc.user)
     res.send(req.oidc.user);
@@ -110,11 +110,11 @@ app.get('/app/login',requiresAuth(), (req, res, next) => {
   }
 });
 
-app.get('/app/profile', requiresAuth(),async (req, res) => {
+app.get('/profile', requiresAuth(),async (req, res) => {
   res.send(req.user)
 })
 
-app.get('/app/pokemon/:id', requiresAuth(), async(req, res, next) => {
+app.get('/pokemon/:id', requiresAuth(), async(req, res, next) => {
   try{
     res.send(await Pokemon.findByPk(req.params.id))
   } catch(error){
@@ -124,7 +124,7 @@ app.get('/app/pokemon/:id', requiresAuth(), async(req, res, next) => {
 })
 
 
-app.get('/app/pokemon',requiresAuth(),async(req, res, next) => {
+app.get('/pokemon',requiresAuth(),async(req, res, next) => {
   try{
     res.send(await req.user.getPokemons())
   } catch(error){
@@ -133,7 +133,7 @@ app.get('/app/pokemon',requiresAuth(),async(req, res, next) => {
   }
 })
   
-app.get('/app/allpokemon', requiresAuth(), async (req, res, next) => {
+app.get('/allpokemon', requiresAuth(), async (req, res, next) => {
   try {
     const pokemon = await Pokemon.findAll();
     res.send(pokemon);
@@ -145,7 +145,7 @@ app.get('/app/allpokemon', requiresAuth(), async (req, res, next) => {
 
 
 
-app.post('/app/createEntry', requiresAuth(), async (req, res, next) => {
+app.post('/createEntry', requiresAuth(), async (req, res, next) => {
   try {
     const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description})
    await newPokemon.setUser(req.user.id)
@@ -157,7 +157,7 @@ app.post('/app/createEntry', requiresAuth(), async (req, res, next) => {
   }
 });
 
-app.delete('/app/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
+app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
 
   try {
     const newPokemon = await Pokemon.findByPk(req.params.id)
