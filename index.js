@@ -129,7 +129,8 @@ app.get('/login',requiresAuth(), (req, res, next) => {
 
 app.get('/profile', requiresAuth(),async (req, res) => {
   res.send(req.user)
-})
+});
+
   
 app.get('/allPokemon',requiresAuth(),async(req, res, next) => {
   try{
@@ -146,12 +147,14 @@ app.get('/allPokemon',requiresAuth(),async(req, res, next) => {
 
 app.get('/pokemon/:id', requiresAuth(), async(req, res, next) => {
   try{
-    res.send(await Pokemon.findByPk(req.params.id))
+    res.send(await req.user.getPokemons())
   } catch(error){
     console.error(error)
     next(error)
   }
 })
+  
+
 
 app.post('/createEntry', requiresAuth(), async (req, res, next) => {
   try {
@@ -166,8 +169,9 @@ app.post('/createEntry', requiresAuth(), async (req, res, next) => {
 });
 
 
-app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
 
+
+app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
   try {
     const newPokemon = await Pokemon.findByPk(req.params.id)
     console.log(newPokemon);
