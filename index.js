@@ -40,6 +40,7 @@ app.use(auth(config));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
+//middleware that means the user logged in is always accessable in endpoints
 app.use(async (req, res, next) => {
   if (req.oidc.user) {
     const { nickname, name, email } = req.oidc.user;
@@ -56,7 +57,9 @@ app.use(async (req, res, next) => {
 });
 
 
-//Put
+//Put (things that update existing data)
+
+//Admin requestion that edits the data of a pokemon
 app.put('/pokemon/:id',requiresAuth(), async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
@@ -83,6 +86,7 @@ app.put('/pokemon/:id',requiresAuth(), async (req, res, next) => {
 
 });
 
+//requestion to add a pokemon to a user
 app.put('/addPokemon/:id',requiresAuth(),async (req, res) => {
   try {
     const pokemon = await Pokemon.findByPk(req.params.pokemonId)
@@ -94,6 +98,7 @@ app.put('/addPokemon/:id',requiresAuth(),async (req, res) => {
   }
 } )
 
+//admin request to promote another use to an admin
 app.put('/promoteAdmin/:id',requiresAuth(), async (req, res, next) => {
   try{
     if (req.user.isAdmin == 1){
@@ -109,6 +114,7 @@ app.put('/promoteAdmin/:id',requiresAuth(), async (req, res, next) => {
   }
 });
 
+//admin request to add/update a description of a pokemon
 app.put('/addDescription/:id',requiresAuth(), async (req, res, next) => {
   try{
     if (req.user.isAdmin == 1){
@@ -125,7 +131,9 @@ app.put('/addDescription/:id',requiresAuth(), async (req, res, next) => {
   }
 })
 
-//pages creation
+//get requests
+
+//default get from auth0 which says if someone is logged in or not
 app.get('/', (req, res) => {
     try{ 
         res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
@@ -135,7 +143,7 @@ app.get('/', (req, res) => {
     }
 });
 
-
+//default login from auth0
 app.get('/login',requiresAuth(), (req, res, next) => {
   try {
     console.log(req.oidc.user)
@@ -146,15 +154,31 @@ app.get('/login',requiresAuth(), (req, res, next) => {
   }
 });
 
+//gets the profile of the person logged in
 app.get('/profile', requiresAuth(),async (req, res) => {
   res.send(req.user)
 });
 
-  
+//admin request for all entries in the pokemon database
 app.get('/allPokemon',requiresAuth(),async(req, res, next) => {
   try{
     if (req.user.isAdmin == 1){
-      res.send(await Pokemon.findAll())
+      let limit;
+    if (req.query.limit){
+        limit = req.query.limit
+    }else{
+        limit = 10
+    }
+    let page;
+    if (req.query.page){
+        page = req.query.page
+    }else{
+        page = 1
+    }
+      res.send(await Pokemon.findAll({
+        limit: limit,
+        offset: limit * (page-1)
+    }))
     }else{
       res.send("Sorry only admin has access to this route")
     }
@@ -164,6 +188,36 @@ app.get('/allPokemon',requiresAuth(),async(req, res, next) => {
   }
 })
 
+//admin request for all entries in the user database
+app.get('/allUsers',requiresAuth(),async(req, res, next) => {
+  try{
+    if (req.user.isAdmin == 1){
+      let limit;
+    if (req.query.limit){
+        limit = req.query.limit
+    }else{
+        limit = 10
+    }
+    let page;
+    if (req.query.page){
+        page = req.query.page
+    }else{
+        page = 1
+    }
+      res.send(await User.findAll({
+        limit: limit,
+        offset: limit * (page-1)
+    }))
+    }else{
+      res.send("Sorry only admin has access to this route")
+    }
+  } catch(error){
+    console.error(error)
+    next(error)
+  }
+})
+
+//admin request to get a specific pokemon entry by id
 app.get('/allPokemon/:id',requiresAuth(),async(req, res, next) => {
   try{
     if (req.user.isAdmin == 1){
@@ -177,6 +231,21 @@ app.get('/allPokemon/:id',requiresAuth(),async(req, res, next) => {
   }
 })
 
+//admin request to get a specific user entry by id
+app.get('/allUsers/:id',requiresAuth(),async(req, res, next) => {
+  try{
+    if (req.user.isAdmin == 1){
+      res.send(await User.findByPk(req.params.id))
+    }else{
+      res.send("Sorry only admin has access to this route")
+    }
+  } catch(error){
+    console.error(error)
+    next(error)
+  }
+})
+
+//gets all the pokemon associated with the logged in user
 app.get('/pokemon', requiresAuth(), async(req, res, next) => {
   try{
     res.send(await req.user.getPokemons())
@@ -186,7 +255,7 @@ app.get('/pokemon', requiresAuth(), async(req, res, next) => {
   }
 })
   
-
+//gets a pokemon by its id associated with the logged in user
 app.get('/pokemon/:id', requiresAuth(), async(req, res, next) => {
   try{
     const pokemon = await req.user.getPokemons()
@@ -202,7 +271,9 @@ app.get('/pokemon/:id', requiresAuth(), async(req, res, next) => {
   }
 })
 
+//post
 
+//admin request to add a pokemon to the database
 app.post('/createEntry', requiresAuth(), async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
@@ -219,10 +290,10 @@ app.post('/createEntry', requiresAuth(), async (req, res, next) => {
   }
 });
 
+//delete
 
-
-
-app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
+//deletes a pokemon entry by id
+app.delete('/deletePokemon/:id', requiresAuth() ,async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
       const Pokemon = await Pokemon.findByPk(req.params.id)
@@ -238,6 +309,22 @@ app.delete('/deleteEntry/:id', requiresAuth() ,async (req, res, next) => {
   }
 });
 
+//deletes a user entry by id
+app.delete('/deleteUser/:id', requiresAuth() ,async (req, res, next) => {
+  try {
+    if (req.user.isAdmin == 1){
+      const user = await User.findByPk(req.params.id)
+      console.log(user);
+      await user.destroy()
+      res.send("successfully deleted")
+    }else{
+      res.send("Sorry only admin has access to this route")
+    }
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+});
 
 
 // error handling middleware
