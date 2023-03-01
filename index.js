@@ -102,7 +102,8 @@ app.put('/promoteAdmin/:id',requiresAuth(), async (req, res, next) => {
     
   }catch (error){
     console.log(error)
-
+  }
+});
 
 //pages creation
 app.get('/', (req, res) => {
@@ -120,6 +121,11 @@ app.get('/login',requiresAuth(), (req, res, next) => {
   try {
     console.log(req.oidc.user)
     res.send(req.oidc.user);
+  } catch(error){
+    console.log(error)
+    next(error)
+  }
+});
 
 app.get('/profile', requiresAuth(),async (req, res) => {
   res.send(req.user)
@@ -146,6 +152,7 @@ app.get('/pokemon/:id', requiresAuth(), async(req, res, next) => {
     next(error)
   }
 })
+
 app.post('/createEntry', requiresAuth(), async (req, res, next) => {
   try {
     const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description})
