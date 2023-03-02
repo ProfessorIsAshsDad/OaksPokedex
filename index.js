@@ -86,14 +86,34 @@ app.put('/pokemon/:id',requiresAuth(), async (req, res, next) => {
 
 });
 
-//requestion to add a pokemon to a user
+//request to add a pokemon to a user
 app.put('/addPokemon/:id',requiresAuth(),async (req, res) => {
   try {
-    const pokemon = await Pokemon.findByPk(req.params.pokemonId)
+    const pokemon = await Pokemon.findByPk(req.params.id)
   await req.user.addPokemon(pokemon)
   await req.user.update({numRegistered: req.user.numRegistered + 1})
   await pokemon.update({timesRegistered: pokemon.timesRegistered + 1})
   res.send("pokemon has been added to user")
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+} )
+
+//request to remove a pokemon to a user
+app.put('/removePokemon/:id',requiresAuth(),async (req, res) => {
+  try {
+    const pokemon = await Pokemon.findByPk(req.params.id)
+    const usersPokemon = await req.user.getPokemons()
+    for (let i = 0; i < usersPokemon.length; i++){
+      if (usersPokemon[i].id == req.params.id){
+        await req.user.removePokemon(pokemon)
+        await req.user.update({numRegistered: req.user.numRegistered - 1})
+  await pokemon.update({timesRegistered: pokemon.timesRegistered - 1})
+        res.send("pokemon has been removed from user")
+      }
+    }
+    res.send("id not registered to user")
   } catch (error) {
     console.log(error)
     next(error)
