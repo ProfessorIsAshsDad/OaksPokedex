@@ -141,7 +141,7 @@ app.put('/adminAddPokemon/:userId/:pokemonId',requiresAuth(),async (req, res) =>
 } )
 
 //admin request to remove a pokemon from any user
-app.put('/adminAddPokemon/:userId/:pokemonId',requiresAuth(),async (req, res) => {
+app.put('/adminRemovePokemon/:userId/:pokemonId',requiresAuth(),async (req, res) => {
   try {
     if (req.user.isAdmin == 1){
       const pokemon = await Pokemon.findByPk(req.params.pokemonId)
