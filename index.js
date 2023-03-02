@@ -91,6 +91,8 @@ app.put('/addPokemon/:id',requiresAuth(),async (req, res) => {
   try {
     const pokemon = await Pokemon.findByPk(req.params.pokemonId)
   await req.user.addPokemon(pokemon)
+  await req.user.update({numRegistered: req.user.numRegistered + 1})
+  await pokemon.update({timesRegistered: pokemon.timesRegistered + 1})
   res.send("pokemon has been added to user")
   } catch (error) {
     console.log(error)
@@ -277,8 +279,9 @@ app.get('/pokemon/:id', requiresAuth(), async(req, res, next) => {
 app.post('/createEntry', requiresAuth(), async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
-    const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description, imgURL:req.body.imgURL})
+    const newPokemon = await Pokemon.create({name: req.body.name, type1: req.body.type1, type2: req.body.type2, description: req.body.description, timesRegistered: req.body.description ,imgURL:req.body.imgURL})
     await req.user.addPokemon(newPokemon)
+    await req.user.update({numRegistered: req.user.numRegistered + 1})
     console.log(newPokemon);
     res.send(newPokemon)
     }else{
@@ -296,9 +299,13 @@ app.post('/createEntry', requiresAuth(), async (req, res, next) => {
 app.delete('/deletePokemon/:id', requiresAuth() ,async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
-      const Pokemon = await Pokemon.findByPk(req.params.id)
-      console.log(Pokemon);
-      await Pokemon.destroy()
+      const pokemon = await Pokemon.findByPk(req.params.id)
+      console.log(pokemon);
+      const users = await pokemon.getUsers()
+      for (let i = 0; i < users.length; i++){
+        await users[i].update({numRegistered: users[i].numRegistered - 1})
+      }
+      await pokemon.destroy()
       res.send("successfully deleted")
     }else{
       res.send("Sorry only admin has access to this route")
@@ -315,6 +322,10 @@ app.delete('/deleteUser/:id', requiresAuth() ,async (req, res, next) => {
     if (req.user.isAdmin == 1){
       const user = await User.findByPk(req.params.id)
       console.log(user);
+      const pokemons = await user.getPokemons()
+      for (let i = 0; i < pokemons.length; i++){
+        await pokemons[i].update({timesRegistered: pokemons[i].timesRegistered - 1})
+      }
       await user.destroy()
       res.send("successfully deleted")
     }else{
