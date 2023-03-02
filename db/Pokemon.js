@@ -5,6 +5,7 @@ const Pokemon = sequelize.define('pokemon', {
   type1: Sequelize.STRING,
   type2: Sequelize.STRING,
   description: Sequelize.STRING,
+  timesRegistered: Sequelize.STRING,
   imgURL: Sequelize.STRING
 },{timestamps: false});
 

@@ -24,6 +24,7 @@ const seed = async () => {
       const pokemon = await Pokemon.create({
         name:pokemonData.name,
         type1:pokemonData["types"][0]["type"]["name"],
+        timesRegistered:0,
         imgURL:pokemonData["sprites"]["front_default"]
       })
 
@@ -33,10 +34,16 @@ const seed = async () => {
 
       if (i <= 151){
         await pokemon.addUser(createdUsers[0].id)
+        await pokemon.update({timesRegistered: pokemon.timesRegistered + 1})
+        await createdUsers[0].update({numRegistered: createdUsers[0].numRegistered + 1})
       }else if (i <=251){
         await pokemon.addUser(createdUsers[1].id)
+        await pokemon.update({timesRegistered: pokemon.timesRegistered + 1})
+        await createdUsers[1].update({numRegistered: createdUsers[1].numRegistered + 1})
       }else{
         await pokemon.addUser(createdUsers[2].id)
+        await pokemon.update({timesRegistered: pokemon.timesRegistered + 1})
+        await createdUsers[2].update({numRegistered: createdUsers[2].numRegistered + 1})
       }
     }
 
