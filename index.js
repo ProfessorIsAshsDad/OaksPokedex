@@ -100,7 +100,7 @@ app.put('/addPokemon/:id',requiresAuth(),async (req, res) => {
   }
 } )
 
-//request to remove a pokemon to a user
+//request to remove a pokemon from a user
 app.put('/removePokemon/:id',requiresAuth(),async (req, res) => {
   try {
     const pokemon = await Pokemon.findByPk(req.params.id)
@@ -120,6 +120,50 @@ app.put('/removePokemon/:id',requiresAuth(),async (req, res) => {
   }
 } )
 
+
+//admin request to add a pokemon to any user
+app.put('/adminAddPokemon/:userId/:pokemonId',requiresAuth(),async (req, res) => {
+  try {
+    if (req.user.isAdmin == 1){
+    const pokemon = await Pokemon.findByPk(req.params.pokemonId)
+    const user = await User.findByPk(req.params.userId)
+  await user.addPokemon(pokemon)
+  await user.update({numRegistered: user.numRegistered + 1})
+  await pokemon.update({timesRegistered: pokemon.timesRegistered + 1})
+  res.send("pokemon has been added to user")
+}else{
+  res.send("Sorry only admin has access to this route")
+}
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+} )
+
+//admin request to remove a pokemon from any user
+app.put('/adminRemovePokemon/:userId/:pokemonId',requiresAuth(),async (req, res) => {
+  try {
+    if (req.user.isAdmin == 1){
+      const pokemon = await Pokemon.findByPk(req.params.pokemonId)
+      const user = await User.findByPk(req.params.userId)
+    const usersPokemon = await user.getPokemons()
+    for (let i = 0; i < usersPokemon.length; i++){
+      if (usersPokemon[i].id == req.params.pokemonId){
+        await user.removePokemon(pokemon)
+        await user.update({numRegistered: user.numRegistered - 1})
+  await pokemon.update({timesRegistered: pokemon.timesRegistered - 1})
+        res.send("pokemon has been removed from user")
+      }
+    }
+    res.send("id not registered to user")
+  }else{
+    res.send("Sorry only admin has access to this route")
+  }
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+} )
 //admin request to promote another use to an admin
 app.put('/promoteAdmin/:id',requiresAuth(), async (req, res, next) => {
   try{
