@@ -40,7 +40,7 @@ app.use(auth(config));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
-//middleware that means the user logged in is always accessable in endpoints
+//middleware that means the user logged in is always accessible in endpoints
 app.use(async (req, res, next) => {
   if (req.oidc.user) {
     const { nickname, name, email } = req.oidc.user;
