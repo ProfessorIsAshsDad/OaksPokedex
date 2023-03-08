@@ -59,7 +59,7 @@ app.use(async (req, res, next) => {
 
 //Put (things that update existing data)
 
-//Admin requestion that edits the data of a pokemon
+//Admin request for editing the data of a pokemon
 app.put('/pokemon/:id',requiresAuth(), async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
@@ -359,7 +359,7 @@ app.post('/createEntry', requiresAuth(), async (req, res, next) => {
 
 //delete
 
-//deletes a pokemon entry by id
+//admin request to delete a pokemon entry by id
 app.delete('/deletePokemon/:id', requiresAuth() ,async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
@@ -380,7 +380,7 @@ app.delete('/deletePokemon/:id', requiresAuth() ,async (req, res, next) => {
   }
 });
 
-//deletes a user entry by id
+//admin request to delete a user entry by id
 app.delete('/deleteUser/:id', requiresAuth() ,async (req, res, next) => {
   try {
     if (req.user.isAdmin == 1){
